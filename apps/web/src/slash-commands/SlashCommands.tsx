@@ -64,6 +64,7 @@ import upgraderoom from "./upgraderoom/upgraderoom";
 import { emoticon } from "./emoticon";
 import { statusCommand } from "./status";
 import { SDKContextClass } from "../contexts/SDKContextClass.ts";
+import Markdown from "../Markdown";
 
 export { CommandCategories, Command };
 
@@ -73,7 +74,10 @@ export const Commands = [
         args: "<message>",
         description: _td("slash_command|spoiler"),
         runFn: function (cli, roomId, threadId, message = "") {
-            return successSync(ContentHelpers.makeHtmlMessage(message, `<span data-mx-spoiler>${message}</span>`));
+            // Render the spoiler contents as Markdown so formatting such as **bold** survives,
+            // and escape any raw HTML the user typed.
+            const html = new Markdown(message).toHTML({ externalLinks: true });
+            return successSync(ContentHelpers.makeHtmlMessage(message, `<span data-mx-spoiler>${html}</span>`));
         },
         category: CommandCategories.messages,
     }),
